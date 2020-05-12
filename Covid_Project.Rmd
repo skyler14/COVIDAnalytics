@@ -1,0 +1,65 @@
+---
+title: "MA2 Project"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = 'C:/Users/ravik/Downloads/Marketing Analytics 2/Project')
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r, include=TRUE, echo=TRUE}
+c.data = read.csv("Covid19-FinalData.csv", header=T)
+str(c.data)
+
+c.data$Year = as.factor(c.data$Year)
+c.data$Week = as.factor(c.data$Week)
+head(c.data)
+```
+
+
+```{r, include=TRUE, echo=TRUE}
+#poisson
+
+c.glm_p = glm(Deaths~Week+Covid+PopDensity+Population+Year+TAVG,
+data=c.data, family=poisson)
+summary(c.glm_p)
+
+print("The AIC of Poisson Log linear Model is  ")
+AIC(c.glm_p)
+print("The BIC of Poisson Log linear Model is ")
+BIC(c.glm_p)
+```
+
+
+```{r, include=TRUE, echo=TRUE}
+#Poisson with RE
+
+library(lme4)
+m.re1 = glmer(Deaths~Week+Covid+PopDensity+Population+Year+TAVG+(1|State),
+data=c.data, family=poisson)
+summary(m.re1)
+
+print("The AIC of Poisson Log linear Model with different Intercepts is  ")
+AIC(m.re1)
+print("The BIC of Poisson Log linear Model with different Intercepts is ")
+BIC(m.re1)
+
+
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
