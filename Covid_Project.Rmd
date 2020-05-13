@@ -4,7 +4,7 @@ output: word_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_knit$set(root.dir = 'C:/Users/ravik/Downloads/Marketing Analytics 2/Project')
+knitr::opts_knit$set(root.dir = getwd())
 ```
 
 ## R Markdown
@@ -14,18 +14,21 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 ```{r, include=TRUE, echo=TRUE}
-c.data = read.csv("Covid19-FinalData.csv", header=T)
+c.data = read.csv("data/Covid19-FinalData.csv", header=T)
 str(c.data)
 
 c.data$Year = as.factor(c.data$Year)
 c.data$Week = as.factor(c.data$Week)
 head(c.data)
+
 ```
 
 
 ```{r, include=TRUE, echo=TRUE}
 #poisson
-
+#we should instead create a weekly baseline trend indexed by state rather then treat each week as 
+#then test for seasonal (my impression is those are small) and see if we can just collapse 
+#the deaths to a weekly baseline with std deviation
 c.glm_p = glm(Deaths~Week+Covid+PopDensity+Population+Year+TAVG,
 data=c.data, family=poisson)
 summary(c.glm_p)

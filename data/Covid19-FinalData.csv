@@ -1,4 +1,4 @@
-State,Week,Average of   Deaths,Covid Feature,TAVG,Average Population Density,Population,Year
+State,Week,Deaths,Covid,TAVG,PopDensity,Population,Year
 Alabama,1,1076,0,46.5,37.38041273,4903185,2019
 Alabama,2,1090,0,46.5,37.38041273,4903185,2019
 Alabama,3,1114,0,46.5,37.38041273,4903185,2019
