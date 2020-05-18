@@ -14,12 +14,68 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 ```{r, include=TRUE, echo=TRUE}
-c.data = read.csv("data/Covid19-FinalData.csv", header=T)
+# c.data = read.csv("data/Covid19-FinalData.csv", header=T)
+c.data = read.csv("data/Covid-Final.csv", header=T)
+
 str(c.data)
+c.data_eda=c.data
 
 c.data$Year = as.factor(c.data$Year)
 c.data$Week = as.factor(c.data$Week)
-head(c.data)
+head(c.data,1000)
+
+```
+
+```{r}
+library(dplyr)
+library(tidyverse)
+library(broom)
+
+# Dont  need since  we dont look at whole years data
+# ReturnWeeks <-function(year){
+#   if (year==2015){
+#     print(year)
+#   }
+#   else {
+#     ReturnWeeks(year-1)
+#     print(year)
+#   }
+# }
+# filter(c.data_eda,Year==2015)$Week
+
+state_trend = filter(c.data_eda,Year<2020) %>% group_by(State) %>% do(model = lm(Deaths ~ Year, data = .)) %>% rowwise() %>% tidy(model)
+
+state_trend
+
+death_stdv=filter(c.data_eda,Year<2020) %>% group_by(State) %>% do(as.data.frame(t(sd(.$Deaths)))) 
+death_stdv
+
+# filter(state_trend,State=='Alabama')$estimate[2]*2020+filter(state_trend,State=='Alabama')$estimate[1]
+
+state_equations=spread(select(state_trend,State,term,estimate),term,estimate)
+
+# c.data_eda$Estimates = c.data_eda %>% rowwise(.) %>% do(filter(state_equations,State==.$State)$"(Intercept)"+filter(state_equations,State==.$State)$Year*.$Year)
+
+#this takes a little while
+est = c.data_eda %>% rowwise(.) %>%
+  do(as.data.frame(t(filter(state_equations,State==.$State)$"(Intercept)"+filter(state_equations,State==.$State)$Year*.$Year)))
+
+
+est$V1
+
+c.data_eda$Estimated=est$V1
+
+c.eda= inner_join(c.data_eda,death_stdv, by="State")
+
+# write.csv(c.eda,'data/CVT.csv')
+
+# filter(select(state_equations,"(Intercept)"),"(Intercept)"==2019)
+# 
+# filter(state_equations,State=='Alabama')$"(Intercept)"+filter(state_equations,State=='Alabama')$Year*2020
+# 
+# 
+# state_equations$"(Intercept)"+state_equations$Year*2020
+
 
 ```
 
