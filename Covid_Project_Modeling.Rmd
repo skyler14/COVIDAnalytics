@@ -1,0 +1,121 @@
+---
+title: "MA2 Project"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = 'C:/Users/ravik/Downloads/Marketing Analytics 2/Project')
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r, include=TRUE, echo=TRUE}
+c.data = read.csv("Covid19-FinalData.csv", header=T)
+str(c.data)
+c.data$Week = as.factor(c.data$Week)
+head(c.data)
+```
+
+
+```{r, include=TRUE, echo=TRUE}
+library(lme4)
+
+#Linear Models to start with some analysis
+
+c.data$Population= scale(c.data$Population, center = FALSE, scale = TRUE)
+
+head(c.data)
+#Simple lm 1 with Covid, PopDensity, Population, TAVG
+c.lm1 = lm(Deaths~Covid+PopDensity+Population+TAVG, data=c.data)
+summary(c.lm1)
+AIC(c.lm1)
+
+# Simple lm 2 with Interaction of Covid with Population
+c.lm2 = lm(Deaths~Covid+PopDensity+Population+TAVG+Population*Covid+PopDensity*Covid, data=c.data)
+summary(c.lm2)
+AIC(c.lm2)
+
+# LM 3 with week
+c.lm3 = lm(Deaths~Covid+Week+PopDensity+Population+TAVG, data=c.data)
+summary(c.lm3)
+AIC(c.lm3)
+
+
+# LM 4 with Week Interaction of Covid with Population 
+c.lm4 = lm(Deaths~Week+Covid+PopDensity+Population+TAVG+Population*Covid+PopDensity*Covid, data=c.data)
+summary(c.lm4)
+AIC(c.lm4)
+
+
+```
+
+
+```{r, include=TRUE, echo=TRUE}
+# Random Effect Models
+
+#Basic RE model 1 with covid and RE at only Intercept [Beta-0 only]
+
+c.re1=lmer(Deaths~Covid+PopDensity+Population+TAVG+(1|State),
+data=c.data, REML=F, control=lmerControl(optimizer="Nelder_Mead"))
+summary(c.re1)
+fixef(c.re1)
+ranef(c.re1)$State
+coef(c.re1)$State
+AIC(c.re1)
+
+# RE model 2 with covid, week and RE at only Intercept [Beta-0 only]
+
+c.re2=lmer(Deaths~Covid+Week+PopDensity+Population+TAVG+(1|State),
+data=c.data, REML=F, control=lmerControl(optimizer="Nelder_Mead"))
+summary(c.re2)
+fixef(c.re2)
+ranef(c.re2)$State
+coef(c.re2)$State
+AIC(c.re2)
+
+# RE Model 3 with Covid, week and RE at Intercept and Covid [Only with Intercept]
+
+c.re3 = lmer(Deaths~Covid+Week+(1+Covid|State),
+data=c.data, REML=F, control=lmerControl(optimizer="Nelder_Mead"))
+summary(c.re3)
+fixef(c.re3)
+ranef(c.re3)$State
+coef(c.re3)$State
+AIC(c.re3)
+
+#RE model 4 with Intercept and covid coefficient as a Beta0,Beta1 function of (Population, Population Density, TAVG )
+
+c.re4 = lmer(Deaths~Covid+PopDensity+Population+TAVG+Population:Covid+PopDensity:Covid+TAVG:Covid+(1+Covid|State),
+data=c.data, REML=F, control=lmerControl(optimizer="Nelder_Mead"))
+summary(c.re4)
+fixef(c.re4)
+ranef(c.re4)$State
+coef(c.re4)$State
+AIC(c.re4)
+
+
+#RE model 5 with Intercept and covid coefficient as a Beta0,Beta1 function of (Population, Population Density, TAVG ) along with Week
+
+c.re5 = lmer(Deaths~Covid+Week+PopDensity+Population+TAVG+Population:Covid+PopDensity:Covid+TAVG:Covid+(1+Covid|State),
+data=c.data, REML=F, control=lmerControl(optimizer="Nelder_Mead"))
+summary(c.re5)
+fixef(c.re5)
+ranef(c.re5)$State
+coef(c.re5)$State
+AIC(c.re5)
+?clclue
+
+
+
+cat(AIC(c.re1),AIC(c.re2),AIC(c.re3),AIC(c.re4),AIC(c.re5))
+
+
+
+
+
+```
+
